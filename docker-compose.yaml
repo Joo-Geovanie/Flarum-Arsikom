@@ -1,0 +1,45 @@
+services:
+  db:
+    image: mariadb
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: flarum
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+      - database:/var/lib/mysql:delegated
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8000:80
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_DATABASE: flarum
+      DB_USERNAME: root
+      DB_PASSWORD: root_password
+    volumes:
+      - storage-app:/var/www/html
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root_password
+
+volumes:
+  db_data:
+  storage-app:
+  database:
